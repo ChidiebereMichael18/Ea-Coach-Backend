@@ -27,7 +27,7 @@ connectDB();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/buses', busRoutes);
-app.use('/api/bookings', bookingRoutes);
+// app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Basic route
