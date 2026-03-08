@@ -6,7 +6,10 @@ const {
   createBus,
   updateBus,
   deleteBus,
-  getAllBookings
+  getAllBookings,
+  getAllDrivers,
+  createDriver,
+  deleteDriver
 } = require('../controllers/adminController');
 // const { protect, admin } = require('../middleware/auth');
 
@@ -21,6 +24,11 @@ router.get('/buses', getAllBuses);
 router.post('/buses', createBus);
 router.put('/buses/:id', updateBus);
 router.delete('/buses/:id', deleteBus);
+
+// Driver management
+router.get('/drivers', getAllDrivers);
+router.post('/drivers', createDriver);
+router.delete('/drivers/:id', deleteDriver);
 
 // Booking management
 router.get('/bookings', getAllBookings);

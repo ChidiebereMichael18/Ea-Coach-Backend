@@ -52,7 +52,14 @@ const createBooking = async (req, res) => {
 const getUserBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate('bus', 'busNumber busType amenities')
+      .populate({
+        path: 'bus',
+        select: 'busNumber busType amenities driver',
+        populate: {
+          path: 'driver',
+          select: 'name phone licenseNumber'
+        }
+      })
       .sort('-createdAt');
     
     res.json(bookings);
@@ -67,7 +74,14 @@ const getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('user', 'name email phone')
-      .populate('bus', 'busNumber busType amenities operator');
+      .populate({
+        path: 'bus',
+        select: 'busNumber busType amenities operator driver',
+        populate: {
+          path: 'driver',
+          select: 'name phone licenseNumber'
+        }
+      });
     
     if (booking) {
       res.json(booking);

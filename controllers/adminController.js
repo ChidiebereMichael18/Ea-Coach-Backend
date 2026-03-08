@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Bus = require('../models/Bus');
 const Booking = require('../models/Booking');
+const Driver = require('../models/Driver');
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -88,11 +89,53 @@ const getAllBookings = async (req, res) => {
   }
 };
 
+// @desc    Get all drivers (admin)
+// @route   GET /api/admin/drivers
+const getAllDrivers = async (req, res) => {
+  try {
+    const drivers = await Driver.find({}).populate('assignedBus', 'busNumber busType');
+    res.json(drivers);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Create a new driver (admin)
+// @route   POST /api/admin/drivers
+const createDriver = async (req, res) => {
+  try {
+    const driver = await Driver.create(req.body);
+    res.status(201).json(driver);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Delete a driver (admin)
+// @route   DELETE /api/admin/drivers/:id
+const deleteDriver = async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id);
+
+    if (driver) {
+      await driver.deleteOne();
+      res.json({ message: 'Driver removed' });
+    } else {
+      res.status(404).json({ message: 'Driver not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getAllBuses,
   createBus,
   updateBus,
   deleteBus,
-  getAllBookings
+  getAllBookings,
+  getAllDrivers,
+  createDriver,
+  deleteDriver
 };

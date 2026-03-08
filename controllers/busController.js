@@ -12,7 +12,7 @@ const getBuses = async (req, res) => {
       query['route.to'] = to;
     }
 
-    const buses = await Bus.find(query);
+    const buses = await Bus.find(query).populate('driver', 'name phone licenseNumber');
     res.json(buses);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -23,7 +23,7 @@ const getBuses = async (req, res) => {
 // @route   GET /api/buses/:id
 const getBusById = async (req, res) => {
   try {
-    const bus = await Bus.findById(req.params.id);
+    const bus = await Bus.findById(req.params.id).populate('driver', 'name phone licenseNumber');
     if (bus) {
       res.json(bus);
     } else {
@@ -44,7 +44,7 @@ const searchBuses = async (req, res) => {
       'route.from': { $regex: from, $options: 'i' },
       'route.to': { $regex: to, $options: 'i' },
       status: 'active'
-    });
+    }).populate('driver', 'name phone licenseNumber');
 
     res.json(buses);
   } catch (error) {

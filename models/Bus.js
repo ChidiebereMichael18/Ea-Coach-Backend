@@ -35,6 +35,10 @@ const busSchema = new mongoose.Schema({
     contact: { type: String },
     logo: { type: String }
   },
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver'
+  },
   status: {
     type: String,
     enum: ['active', 'maintenance', 'inactive'],

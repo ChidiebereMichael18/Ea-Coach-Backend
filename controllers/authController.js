@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Booking = require('../models/Booking');
+const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT Token
@@ -83,4 +85,60 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Delete current user account
+// @route   DELETE /api/auth/profile
+const deleteCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Remove admin record if this user is an admin
+    await Admin.deleteOne({ user: userId });
+
+    // Delete the user account
+    await User.findByIdAndDelete(userId);
+
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Get total amount spent on bookings
+// @route   GET /api/auth/bookings/total-amount
+const getTotalBookingAmount = async (req, res) => {
+  try {
+    const isAdmin = req.user && req.user.role === 'admin';
+
+    const matchStage = isAdmin ? {} : { user: req.user._id };
+
+    const result = await Booking.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$totalAmount' },
+          totalBookings: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const totalAmount = result[0]?.totalAmount || 0;
+    const totalBookings = result[0]?.totalBookings || 0;
+
+    res.json({
+      scope: isAdmin ? 'all_bookings' : 'my_bookings',
+      totalAmount,
+      totalBookings
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  deleteCurrentUser,
+  getTotalBookingAmount
+};
