@@ -61,7 +61,7 @@ const bookingSchema = new mongoose.Schema({
 });
 
 // Generate unique booking ID before saving
-bookingSchema.pre('save', async function(next) {
+bookingSchema.pre('save', async function() {
   if (!this.bookingId) {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
@@ -69,7 +69,7 @@ bookingSchema.pre('save', async function(next) {
     const random = Math.floor(1000 + Math.random() * 9000);
     this.bookingId = `BUS${year}${month}${random}`;
   }
-  next();
+  
 });
 
 module.exports = mongoose.model('Booking', bookingSchema);

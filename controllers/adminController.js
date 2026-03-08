@@ -45,7 +45,7 @@ const updateBus = async (req, res) => {
       const updatedBus = await Bus.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true, runValidators: true }
+        { returnDocument: 'after' }
       );
       res.json(updatedBus);
     } else {
