@@ -18,7 +18,7 @@ const getAllUsers = async (req, res) => {
 // @route   GET /api/admin/buses
 const getAllBuses = async (req, res) => {
   try {
-    const buses = await Bus.find({});
+    const buses = await Bus.find({}).populate('driver', 'name');
     res.json(buses);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -47,7 +47,7 @@ const updateBus = async (req, res) => {
         req.params.id,
         req.body,
         { returnDocument: 'after' }
-      );
+      ).populate('driver', 'name');
       res.json(updatedBus);
     } else {
       res.status(404).json({ message: 'Bus not found' });
@@ -93,7 +93,7 @@ const getAllBookings = async (req, res) => {
 // @route   GET /api/admin/drivers
 const getAllDrivers = async (req, res) => {
   try {
-    const drivers = await Driver.find({}).populate('assignedBus', 'busNumber busType');
+    const drivers = await Driver.find({}).populate('assignedBus', 'busNumber busType operator');
     res.json(drivers);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -106,6 +106,38 @@ const createDriver = async (req, res) => {
   try {
     const driver = await Driver.create(req.body);
     res.status(201).json(driver);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Update a driver (admin)
+// @route   PUT /api/admin/drivers/:id
+const updateDriver = async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id);
+    
+    if (driver) {
+      // If a new bus is being assigned, sync the bidirectional mapping
+      if (req.body.assignedBus && req.body.assignedBus !== driver.assignedBus?.toString()) {
+        // Clear driver from previous bus, if applicable
+        if (driver.assignedBus) {
+          await Bus.findByIdAndUpdate(driver.assignedBus, { $unset: { driver: 1 } });
+        }
+        // Set new driver reference to newly assigned bus
+        await Bus.findByIdAndUpdate(req.body.assignedBus, { driver: driver._id });
+      }
+
+      const updatedDriver = await Driver.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true }
+      ).populate('assignedBus', 'busNumber busType operator');
+      
+      res.json(updatedDriver);
+    } else {
+      res.status(404).json({ message: 'Driver not found' });
+    }
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -137,5 +169,6 @@ module.exports = {
   getAllBookings,
   getAllDrivers,
   createDriver,
+  updateDriver,
   deleteDriver
 };
