@@ -11,12 +11,22 @@ const authRoutes = require('./routes/authRoutes');
 const busRoutes = require('./routes/busRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 // Initialize express
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors(
+  {
+    origin: 'http://localhost:5173',
+    credentials: true,
+  },
+  {
+    origin: 'https://ea-coach-v.vercel.app',
+    credentials: true,
+  }
+));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,6 +39,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/buses', busRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
