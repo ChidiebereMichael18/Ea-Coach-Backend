@@ -25,6 +25,7 @@ const busSchema = new mongoose.Schema({
   route: {
     from: { type: String, required: true },
     to: { type: String, required: true },
+    departureDate: { type: Date, required: true },
     departureTime: { type: String, required: true },
     arrivalTime: { type: String, required: true },
     distance: { type: String },

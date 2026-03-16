@@ -12,6 +12,14 @@ const getBuses = async (req, res) => {
       query['route.to'] = to;
     }
 
+    if (date) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      query['route.departureDate'] = { $gte: start, $lte: end };
+    }
+
     const buses = await Bus.find(query).populate('driver', 'name phone licenseNumber');
     res.json(buses);
   } catch (error) {
@@ -39,13 +47,22 @@ const getBusById = async (req, res) => {
 const searchBuses = async (req, res) => {
   try {
     const { from, to, date } = req.query;
-    
-    const buses = await Bus.find({
+
+    const query = {
       'route.from': { $regex: from, $options: 'i' },
       'route.to': { $regex: to, $options: 'i' },
       status: 'active'
-    }).populate('driver', 'name phone licenseNumber');
+    };
 
+    if (date) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      query['route.departureDate'] = { $gte: start, $lte: end };
+    }
+
+    const buses = await Bus.find(query).populate('driver', 'name phone licenseNumber');
     res.json(buses);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
