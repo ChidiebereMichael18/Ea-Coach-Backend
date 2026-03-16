@@ -27,5 +27,5 @@ const admin = async (req, res, next) => {
     res.status(403).json({ message: 'Not authorized as admin' });
   }
 };
-
+// middelewares
 module.exports = { protect, admin };
