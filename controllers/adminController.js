@@ -14,6 +14,93 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// @desc    Create a new user (admin)
+// @route   POST /api/admin/users
+const createUser = async (req, res) => {
+  try {
+    const { name, email, password, phone, role } = req.body;
+    
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      role: role || 'user'
+    });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      });
+    } else {
+      res.status(400).json({ message: 'Invalid user data' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Update a user (admin)
+// @route   PUT /api/admin/users/:id
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.phone = req.body.phone || user.phone;
+      user.role = req.body.role || user.role;
+      
+      // Update password if provided
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      const updatedUser = await user.save();
+      
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Delete a user (admin)
+// @route   DELETE /api/admin/users/:id
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (user) {
+      await user.deleteOne();
+      res.json({ message: 'User removed' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // @desc    Get all buses (admin)
 // @route   GET /api/admin/buses
 const getAllBuses = async (req, res) => {
@@ -162,6 +249,9 @@ const deleteDriver = async (req, res) => {
 
 module.exports = {
   getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
   getAllBuses,
   createBus,
   updateBus,
